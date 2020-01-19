@@ -1,0 +1,87 @@
+---
+- name: Install tinc
+  apt:
+    name: "{{ tinc_packages }}"
+    default_release: "{{ tinc_default_release }}"
+    state: present
+  notify:
+    - Restart tinc
+
+- name: Create network directory
+  file:
+    path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}"
+    state: directory
+    mode: 0750
+
+- name: Create network host directory
+  file:
+    path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts"
+    state: directory
+    mode: 0750
+
+- name: Configure network
+  template:
+    dest: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/tinc.conf"
+    src: "tinc.conf.j2"
+    mode: 0640
+  notify:
+    - "Reload tinc instance {{ tinc_network_name }}"
+
+- name: Upload network private keys
+  copy:
+    content: "{{ tinc_private_key }}"
+    dest: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/rsa_key.priv"
+    mode: 0400
+  when: tinc_private_key | bool
+  notify:
+    - "Reload tinc instance {{ tinc_network_name }}"
+
+- name: Generate keys
+  command: "tincd -n {{ tinc_network_name }} -K {{ tinc_key_bits }}"
+  args:
+    creates: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/rsa_key.priv"
+  when: not (tinc_private_key | bool)
+  notify:
+    - "Reload tinc instance {{ tinc_network_name }}"
+
+- name: Create host configuration
+  blockinfile:
+    path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts/{{ inventory_hostname }}"
+    content: "{{ lookup('template', 'host.j2') }}"
+    create: true
+    insertbefore: BOF
+    marker: "# {mark} host configuration"
+    mode: 0640
+  notify:
+    - "Reload tinc instance {{ tinc_network_name }}"
+
+- name: Read local host configuration
+  slurp:
+    path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts/{{ inventory_hostname }}"
+  register: tinc_host_conf_
+
+- name: Propagate host configuration
+  copy:
+    dest: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts/{{ inventory_hostname }}"
+    content: "{{ tinc_host_conf_.content | b64decode }}"
+    mode: 0640
+  delegate_to: "{{ item }}"
+  when: item != inventory_hostname
+  loop: "{{ groups[tinc_group] }}"
+  notify:
+    - "Reload tinc instance {{ tinc_network_name }}"
+
+- name: Create scripts
+  copy:
+    dest: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/{{ item.key }}"
+    content: "{{ item.value }}"
+    mode: 0750
+  loop: "{{ tinc_scripts | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Configure system service
+  service:
+    name: "{{ tinc_service }}{{ tinc_network_name }}"
+    state: "{{ tinc_state }}"
+    enabled: "{{ tinc_enabled }}"

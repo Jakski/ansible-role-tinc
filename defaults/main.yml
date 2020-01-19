@@ -1,0 +1,65 @@
+---
+###
+# Packages with tinc and related tools
+tinc_packages:
+  - tinc
+
+###
+# systemd service template
+tinc_service: tinc@
+
+###
+# Default packages release
+tinc_default_release: ""
+#
+###
+# Desired service state
+tinc_state: started
+
+###
+# Whether to enable system service
+tinc_enabled: true
+
+###
+# Whether to restart when necessary
+tinc_restart: true
+
+###
+# Whether to reload when necessary
+tinc_reload: true
+
+###
+# Configuration directory
+tinc_conf_dir: /etc/tinc
+
+###
+# Generated keys length
+tinc_key_bits: 4096
+
+###
+# Network name
+tinc_network_name: example-network
+
+###
+# Inventory group with network nodes
+tinc_group: example-network-nodes
+
+###
+# Main configuration
+tinc_main_conf: {}
+
+###
+# Host configuration. It will be propagated to all nodes in network.
+tinc_host_conf: {}
+
+###
+# Private key. Must be used together with public key.
+tinc_private_key: ~
+
+###
+# Public key. Must be used together with private key.
+tinc_public_key: ~
+
+###
+# Hooks
+tinc_scripts: {}

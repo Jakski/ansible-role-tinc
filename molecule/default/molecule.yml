@@ -1,0 +1,58 @@
+---
+driver:
+  name: docker
+lint:
+  name: yamllint
+  enabled: false
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
+platforms:
+  - name: "${MOLECULE_INSTANCE_PREFIX:-instance}1"
+    groups:
+      - host1
+      - tinc_test1
+    image: jakski/systemd:debian-10
+    command: /sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    tty: true
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    networks:
+      - name: shared
+  - name: "${MOLECULE_INSTANCE_PREFIX:-instance}2"
+    groups:
+      - host2
+      - tinc_test1
+    image: jakski/systemd:debian-10
+    command: /sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    tty: true
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    networks:
+      - name: shared
+dependency:
+  name: shell
+  command: molecule/link-mitogen.sh
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      stdout_callback: yaml
+      strategy_plugins: ${MOLECULE_SCENARIO_DIRECTORY}/plugins/strategy
+      strategy: mitogen_linear
+  playbooks:
+    docker:
+      create: ../docker-create.yml
+    converge: playbook.yml
+    side_effect: side-effect.yml
+  inventory:
+    group_vars:
+      all:
+        ansible_python_interpreter: /usr/bin/python3
