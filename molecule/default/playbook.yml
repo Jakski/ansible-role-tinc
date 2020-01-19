@@ -8,7 +8,6 @@
         tinc_group: "{{ test_networks.test1.group }}"
         tinc_main_conf: "{{ test_networks.test1.main_conf }}"
         tinc_host_conf: "{{ test_networks.test1.host_conf }}"
-        tinc_scripts: "{{ test_networks.test1.scripts }}"
 
     - import_role:
         name: tinc
@@ -17,4 +16,3 @@
         tinc_group: "{{ test_networks.test2.group }}"
         tinc_main_conf: "{{ test_networks.test2.main_conf }}"
         tinc_host_conf: "{{ test_networks.test2.host_conf }}"
-        tinc_scripts: "{{ test_networks.test2.scripts }}"

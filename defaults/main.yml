@@ -5,6 +5,10 @@ tinc_packages:
   - tinc
 
 ###
+# Host identifier in network
+tinc_host_name: "{{ inventory_hostname }}"
+
+###
 # systemd service template
 tinc_service: tinc@
 
@@ -62,4 +66,30 @@ tinc_public_key: ~
 
 ###
 # Hooks
-tinc_scripts: {}
+tinc_scripts:
+  tinc-up: |
+    #!/usr/bin/env bash
+    ip link set up "$INTERFACE"
+  subnet-up: |
+    #!/usr/bin/env bash
+    if [ "$NAME" = "$NODE" ]; then
+      ip address add dev "$INTERFACE" "$SUBNET"
+    else
+      ip route add "$SUBNET" dev "$INTERFACE"
+    fi
+  subnet-down: |
+    #!/usr/bin/env bash
+    if [ "$NAME" = "$NODE" ]; then
+      ip address del "$SUBNET" dev "$INTERFACE"
+    else
+      ip route del dev "$INTERFACE" "$SUBNET"
+    fi
+
+###
+# Whether to remove host configurations non-existent in group
+tinc_manage_hosts: true
+
+###
+# Don't manage this hosts. It let's you authorize external hosts, managing
+# the rest at the same time.
+tinc_hosts_whitelist: []

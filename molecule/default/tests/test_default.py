@@ -29,6 +29,11 @@ def test_service(host):
     assert host.socket('udp://0.0.0.0:656').is_listening
 
 
+def test_host_configurations(host):
+    assert host.file('/etc/tinc/test1/hosts/fake-instance1').is_file
+    assert not host.file('/etc/tinc/test1/hosts/fake-instance2').exists
+
+
 def test_interfaces(host):
     iface = host.interface('test1')
     assert iface.exists

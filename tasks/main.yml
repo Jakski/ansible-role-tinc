@@ -7,6 +7,36 @@
   notify:
     - Restart tinc
 
+- block:
+    - name: Persist hostname as a fact
+      set_fact:
+        tinc_host_names_: >
+          {{
+            tinc_host_names_ | default({}) | combine({
+              tinc_network_name: tinc_host_name
+            }, recursive=True)
+          }}
+
+    - name: Find existing hosts
+      find:
+        path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts"
+        file_type: file
+      register: tinc_hosts_
+
+    - name: Remove unmanaged and not whitelisted hosts
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      when: >
+        item.path|basename not in tinc_network_host_names_
+        and item.path|basename not in tinc_hosts_whitelist
+      loop: "{{ tinc_hosts_.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+      notify:
+        - "Reload tinc instance {{ tinc_network_name }}"
+  when: tinc_manage_hosts | bool
+
 - name: Create network directory
   file:
     path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}"
@@ -46,7 +76,7 @@
 
 - name: Create host configuration
   blockinfile:
-    path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts/{{ inventory_hostname }}"
+    path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts/{{ tinc_host_name }}"
     content: "{{ lookup('template', 'host.j2') }}"
     create: true
     insertbefore: BOF
@@ -57,12 +87,12 @@
 
 - name: Read local host configuration
   slurp:
-    path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts/{{ inventory_hostname }}"
+    path: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts/{{ tinc_host_name }}"
   register: tinc_host_conf_
 
 - name: Propagate host configuration
   copy:
-    dest: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts/{{ inventory_hostname }}"
+    dest: "{{ tinc_conf_dir }}/{{ tinc_network_name }}/hosts/{{ tinc_host_name }}"
     content: "{{ tinc_host_conf_.content | b64decode }}"
     mode: 0640
   delegate_to: "{{ item }}"

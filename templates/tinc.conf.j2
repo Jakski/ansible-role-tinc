@@ -1,4 +1,4 @@
-Name = {{ inventory_hostname }}
+Name = {{ tinc_host_name }}
 {% for k, v in tinc_main_conf.items() -%}
 {% if v is not string and v is sequence -%}
 {% for v_item in v -%}

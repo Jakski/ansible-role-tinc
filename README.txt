@@ -1,7 +1,16 @@
 ansible-role-tinc
 *****************
 
-Role to setup tinc
+Role to setup tinc.
+
+Warning:
+
+  Although this role supports multiple instances of tinc running on
+  single node, it doesn't handle tinc upgrades well. Package upgrade
+  event is emitted only once, so if you apply this role multiple times
+  on single node in different plays, than only first play will
+  actually trigger restart. It's good to perform manual restart after
+  upgrade, if you own complicated setup.
 
 
 Variables
@@ -10,6 +19,10 @@ Variables
 tinc_packages
 
    Packages with tinc and related tools
+
+tinc_host_name
+
+   Host identifier in network
 
 tinc_service
 
@@ -70,6 +83,15 @@ tinc_public_key
 tinc_scripts
 
    Hooks
+
+tinc_manage_hosts
+
+   Whether to remove host configurations non-existent in group
+
+tinc_hosts_whitelist
+
+   Don't manage this hosts. It let's you authorize external hosts,
+   managing the rest at the same time.
 
 
 Examples

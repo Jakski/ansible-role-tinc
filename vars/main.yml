@@ -1,0 +1,7 @@
+---
+tinc_network_host_names_: >
+  {%- set ns = namespace(names=[]) -%}
+  {%- for host in groups[tinc_group] -%}
+    {%- set ns.names = ns.names | union([hostvars[host].tinc_host_names_[tinc_network_name]]) -%}
+  {%- endfor -%}
+  {{ ns.names }}

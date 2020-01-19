@@ -1,0 +1,48 @@
+---
+- hosts: all
+  gather_facts: false
+  vars:
+    external_hosts:
+      fake-instance1: |
+        Address = fake-instance1
+        Subnet = 10.0.0.5/32
+
+        -----BEGIN RSA PUBLIC KEY-----
+        MIICCgKCAgEAs46I8kOqiDOJA5HjflueHsmlpxHcblT79n6hzYKP66XDQURwBAhy
+        GzV7SnOVo3/5QfzjqcUUOV+QZ6z8W4PGSO/4uJ5pgmfFd4SdNWF/9a0IoU+T0H8h
+        1Fr/ClkXskn2/cGpaZj5So2KIxEZpjKND95hJdqMeNdok6P0P3ZwTKzwv36m1soq
+        vc1dF8vf3kThTqrshnW4x/vCsWMniWzlsfKD/RF1OrVM0b2ckhxfRLVoN6nluacU
+        kMJvOv0XCyinu8+RIaHc/x5y8Pxrflnjzu2Rhed7md//lA7Os0AV0OnRu/ZWGW5O
+        NSjmM0hdN3qW12kJ9YXkX0J2S10BUqvZiNHnxsmjdHnxPNQTOyHBnk3POoLGdfzx
+        Dfz6HWjVJXJox2ajozvyisGbcwHF5RjSDWvxPqM0Qogsw5YI89vvTANV3jzgxk9u
+        rIEu0zwFpkDj/MNjhUdcV00xFcllaSUFMgZ4D/LTa3KI/bnSCtO8idTRpwcEr2Gn
+        VfjbTEuqCEPEgdvjJ78n2cGRRjEjH0YQVTNdgqQKxJw4h8eFd9vJEHtAtuUM7Tuw
+        4XcaOC82bEKZaOcwzNqxQo40+ria5pchp1l/Eu9ifXw11pEE1jPNWQoAeTPbEALK
+        NlvPcX+EN7lizQl09Vy/MygE4B7EPdqdDehsnPjEFWGj5/QnLx+eB10CAwEAAQ==
+        -----END RSA PUBLIC KEY-----
+      fake-instance2: |
+        Address = fake-instance1
+        Subnet = 10.0.0.6/32
+
+        -----BEGIN RSA PUBLIC KEY-----
+        MIICCgKCAgEAs46I8kOqiDOJA5HjflueHsmlpxHcblT79n6hzYKP66XDQURwBAhy
+        GzV7SnOVo3/5QfzjqcUUOV+QZ6z8W4PGSO/4uJ5pgmfFd4SdNWF/9a0IoU+T0H8h
+        1Fr/ClkXskn2/cGpaZj5So2KIxEZpjKND95hJdqMeNdok6P0P3ZwTKzwv36m1soq
+        vc1dF8vf3kThTqrshnW4x/vCsWMniWzlsfKD/RF1OrVM0b2ckhxfRLVoN6nluacU
+        kMJvOv0XCyinu8+RIaHc/x5y8Pxrflnjzu2Rhed7md//lA7Os0AV0OnRu/ZWGW5O
+        NSjmM0hdN3qW12kJ9YXkX0J2S10BUqvZiNHnxsmjdHnxPNQTOyHBnk3POoLGdfzx
+        Dfz6HWjVJXJox2ajozvyisGbcwHF5RjSDWvxPqM0Qogsw5YI89vvTANV3jzgxk9u
+        rIEu0zwFpkDj/MNjhUdcV00xFcllaSUFMgZ4D/LTa3KI/bnSCtO8idTRpwcEr2Gn
+        VfjbTEuqCEPEgdvjJ78n2cGRRjEjH0YQVTNdgqQKxJw4h8eFd9vJEHtAtuUM7Tuw
+        4XcaOC82bEKZaOcwzNqxQo40+ria5pchp1l/Eu9ifXw11pEE1jPNWQoAeTPbEALK
+        NlvPcX+EN7lizQl09Vy/MygE4B7EPdqdDehsnPjEFWGj5/QnLx+eB10CAwEAAQ==
+        -----END RSA PUBLIC KEY-----
+  tasks:
+    - name: Create external hosts
+      copy:
+        dest: "/etc/tinc/test1/hosts/{{ item.key }}"
+        content: "{{ item.value }}"
+        mode: 640
+      loop: "{{ external_hosts | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"

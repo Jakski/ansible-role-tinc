@@ -9,14 +9,6 @@ test_networks:
     host_conf:
       Address: "{{ inventory_hostname }}"
       Subnet: 10.0.0.2/32
-    scripts:
-      tinc-up: |
-        #!/usr/bin/env bash
-        ip address add dev "$INTERFACE" 10.0.0.2/32
-        ip link set up "$INTERFACE"
-      subnet-up: |
-        #!/usr/bin/env bash
-        ip route add "$SUBNET" dev "$INTERFACE"
   test2:
     group: tinc_test1
     main_conf:
@@ -27,11 +19,3 @@ test_networks:
       Address: "{{ inventory_hostname }}"
       Port: 656
       Subnet: 10.0.0.4/32
-    scripts:
-      tinc-up: |
-        #!/usr/bin/env bash
-        ip address add dev "$INTERFACE" 10.0.0.4/32
-        ip link set up "$INTERFACE"
-      subnet-up: |
-        #!/usr/bin/env bash
-        ip route add "$SUBNET" dev "$INTERFACE"

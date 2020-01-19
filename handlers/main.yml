@@ -16,5 +16,3 @@
     tinc_reload and tinc_state != 'stopped'
     and (tinc_restart_ is not defined or
          tinc_restart_ is not changed)
-  listen:
-    - "Reload tinc instance {{ tinc_network_name }}"

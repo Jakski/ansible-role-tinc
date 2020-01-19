@@ -1,0 +1,3 @@
+---
+tinc_hosts_whitelist:
+  - fake-instance1
